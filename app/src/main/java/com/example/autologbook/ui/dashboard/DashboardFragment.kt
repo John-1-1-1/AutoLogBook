@@ -1,5 +1,6 @@
 package com.example.autologbook.ui.dashboard
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,7 +8,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.autologbook.databinding.FragmentDashboardBinding
+import com.example.autologbook.kernel.types.ItemsViewModel
+import com.example.autologbook.ui.add_entry.AddNewEntry
 
 class DashboardFragment : Fragment() {
 
@@ -28,10 +32,21 @@ class DashboardFragment : Fragment() {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textDashboard
-        dashboardViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+        val recyclerview = binding.rcView
+        recyclerview.layoutManager = LinearLayoutManager(context)
+
+        val data = ArrayList<ItemsViewModel>()
+        for (i in 1..20) {
+            data.add(ItemsViewModel( "Item " + i))
         }
+        val adapter = Adapter(data)
+        recyclerview.adapter = adapter
+
+        binding.floatingActionButton3.setOnClickListener {
+            val intent = Intent(context, AddNewEntry::class.java)
+            startActivity(intent)
+        }
+
         return root
     }
 
