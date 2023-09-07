@@ -21,9 +21,11 @@ class Adapter(private val mList: List<ItemsViewModel>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val ItemsViewModel = mList[position]
-        holder.textView.text = ItemsViewModel.text
+        holder.textViewLarge.text = ItemsViewModel.textViewLarge
+        holder.textViewSmall.text = ItemsViewModel.textViewSmall
+        holder.textViewPrice.text = ItemsViewModel.textViewPrice
         holder.itemView.setOnClickListener({
-                v -> Log.d("TAG", holder.textView.text.toString())
+                v -> Log.d("TAG", holder.textViewLarge.text.toString())
         })
 
     }
@@ -34,7 +36,9 @@ class Adapter(private val mList: List<ItemsViewModel>) :
 
     class ViewHolder(ItemView: View) : RecyclerView.ViewHolder(ItemView) {
 
-        val textView: TextView = itemView.findViewById(R.id.textViewLarge)
+        val textViewLarge: TextView = itemView.findViewById(R.id.textViewLarge)
+        val textViewSmall: TextView = itemView.findViewById(R.id.textViewSmall)
+        val textViewPrice: TextView = itemView.findViewById(R.id.textViewPrice)
 
     }
 }

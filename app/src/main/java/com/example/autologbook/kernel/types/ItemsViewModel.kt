@@ -1,9 +1,13 @@
 package com.example.autologbook.kernel.types
 
-class ItemsViewModel(string: String) {
-    var text: String = ""
+class ItemsViewModel(textLarge: String, textSmaller: String, price: String) {
+    var textViewLarge = ""
+    var textViewSmall = ""
+    var textViewPrice = ""
 
     init {
-        text = string
+        textViewLarge = textLarge
+        textViewSmall = textSmaller
+        textViewPrice = price
     }
 }

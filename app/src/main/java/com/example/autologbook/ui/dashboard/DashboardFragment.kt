@@ -1,53 +1,83 @@
 package com.example.autologbook.ui.dashboard
 
-import android.content.Intent
+import android.content.Context
+import android.database.Cursor
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.autologbook.databinding.FragmentDashboardBinding
+import com.example.autologbook.kernel.file_system_handler.DbHelper
 import com.example.autologbook.kernel.types.ItemsViewModel
-import com.example.autologbook.ui.add_entry.AddNewEntry
+import java.lang.Exception
+
 
 class DashboardFragment : Fragment() {
 
     private var _binding: FragmentDashboardBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
+    private lateinit var recyclerview: RecyclerView
+    private lateinit var activityLauncher:  ActivityResultLauncher<String>
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        activityLauncher = registerForActivityResult(MyActivityContract()) { result ->
+                updateList()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val dashboardViewModel =
-            ViewModelProvider(this).get(DashboardViewModel::class.java)
 
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val recyclerview = binding.rcView
+        recyclerview = binding.rcView
         recyclerview.layoutManager = LinearLayoutManager(context)
 
-        val data = ArrayList<ItemsViewModel>()
-        for (i in 1..20) {
-            data.add(ItemsViewModel( "Item " + i))
-        }
-        val adapter = Adapter(data)
-        recyclerview.adapter = adapter
-
         binding.floatingActionButton3.setOnClickListener {
-            val intent = Intent(context, AddNewEntry::class.java)
-            startActivity(intent)
+            activityLauncher.launch("")
         }
 
         return root
+    }
+
+
+    fun getDbContent(cursor: Cursor?, nameColumn: String) : String {
+
+        if (cursor == null){
+             throw Exception("Cursor matters null")
+        }
+
+        var indexColumn = cursor.getColumnIndex(nameColumn)
+        if (indexColumn  < -1){
+            throw Exception("Name $nameColumn is not defind")
+        }
+        return cursor.getString(indexColumn)
+
+    }
+
+    fun updateList(){
+        var db = DbHelper.getInstance()
+        var r = db.getAll()
+
+        val data = ArrayList<ItemsViewModel>()
+        while (r!!.moveToNext()){
+
+            data.add(ItemsViewModel(
+                getDbContent(r, DbHelper.LITRE_COL),
+                getDbContent(r, DbHelper.DATE_COL),
+                getDbContent(r, DbHelper.PRICE_COL)))
+        }
+        val adapter = Adapter(data)
+        recyclerview.adapter = adapter
     }
 
     override fun onDestroyView() {

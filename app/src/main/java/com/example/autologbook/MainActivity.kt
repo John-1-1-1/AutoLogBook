@@ -1,6 +1,8 @@
 package com.example.autologbook
 
+import android.os.Build
 import android.os.Bundle
+import androidx.annotation.RequiresApi
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -8,13 +10,17 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.autologbook.databinding.ActivityMainBinding
+import com.example.autologbook.kernel.file_system_handler.DbHelper
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        SingletonCreator()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -29,7 +35,13 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
             )
         )
+
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+    }
+
+    fun SingletonCreator(){
+        var db = DbHelper(this, null)
+        db.CreateSingleton()
     }
 }

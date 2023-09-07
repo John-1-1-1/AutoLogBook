@@ -1,20 +1,18 @@
 package com.example.autologbook.ui.add_entry
 
-
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.autologbook.databinding.ActivityAddNewEntryBinding
-import com.example.autologbook.kernel.types.DateTime
+import com.example.autologbook.kernel.file_system_handler.DbHelper
 import java.util.Calendar
-
 
 internal class AddNewEntry : AppCompatActivity() {
 
     lateinit var binding: ActivityAddNewEntryBinding
 
-    val dateTime = DateTime(Calendar.getInstance().time)
+    var dateTime = Calendar.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,10 +20,23 @@ internal class AddNewEntry : AppCompatActivity() {
         binding = ActivityAddNewEntryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.getDateTimeButton.setOnClickListener { getDateAndTime() }
-        binding.addEntryCancelButton.setOnClickListener { this.finish() }
+        binding.addEntryButtonDate.setOnClickListener { getDateAndTime() }
+        binding.addEntryCancelButton.setOnClickListener { super.finish() }
 
-        binding.addEntryDate.text = dateTime.toString()
+        binding.addEntryDate.text =  getDate()
+
+        binding.addEntrySaveButton.setOnClickListener {
+
+            if(binding.addEntryPrice.text.isNotEmpty() and binding.addEntryLitre.text.isNotEmpty()) {
+            DbHelper.getInstance().add(
+                binding.addEntryLitre.text.toString().toFloat(),
+                binding.addEntryPrice.text.toString().toFloat(),
+                binding.addEntryComment.text.toString(),
+                dateTime.time)
+            } else {
+
+            }
+        }
     }
 
 
@@ -33,29 +44,38 @@ internal class AddNewEntry : AppCompatActivity() {
         val dateSetListener =
             DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
 
-                dateTime.Year = year + 1900
-                dateTime.Month = monthOfYear
-                dateTime.Day = dayOfMonth
+                val Year = year
+                val Month = monthOfYear
+                val Day = dayOfMonth
 
                 val timeSetListener =
                     TimePickerDialog.OnTimeSetListener { timePicker, hour, minute ->
-                        dateTime.Hour = hour
-                        dateTime.Minute = minute
+                        val calendarInstance = Calendar.getInstance()
+                        calendarInstance.set(Year, Month, Day, hour, minute)
+                        dateTime = calendarInstance
+
+                        binding.addEntryDate.text = getDate()
                     }
                 TimePickerDialog(
                     this, timeSetListener,
-                    dateTime.Hour,
-                    dateTime.Minute, true
+                    dateTime.get(Calendar.HOUR_OF_DAY),
+                    dateTime.get(Calendar.MINUTE), true
                 ).show()
-
-                binding.addEntryDate.text = dateTime.toString()
             }
 
         DatePickerDialog(
             this, dateSetListener,
-            dateTime.Year,
-            dateTime.Month,
-            dateTime.Day
+            dateTime.get(Calendar.YEAR),
+            dateTime.get(Calendar.MONTH),
+            dateTime.get(Calendar.DATE)
         ).show()
+    }
+
+    fun getDate(): String{
+        return dateTime.get(Calendar.YEAR).toString().plus(
+            "-".plus(dateTime.get(Calendar.MONTH).toString().plus(
+                "-".plus(dateTime.get(Calendar.DATE).toString().plus(
+                    " ".plus(dateTime.get(Calendar.HOUR_OF_DAY).toString().padStart(2, '0').plus(
+                        ":".plus(dateTime.get(Calendar.MINUTE).toString().padStart(2, '0')))))))))
     }
 }
